@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "demoapp.fullname" . }}
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "demoapp.fullname" . }}
+    spec:
+      containers:
+      - name: {{ template "demoapp.fullname" . }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ default "" .Values.image.pullPolicy | quote }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.appservice.internalPort }}
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+        volumeMounts:
+        - name: db-config
+          mountPath: /app
+      volumes:
+      - name: db-config
+        configMap: 
+          name: {{ template "fullname" . }}             
+
+  ---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "demodb.fullname" . }}
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+spec:
+  #replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "demodb.fullname" . }}
+    spec:
+      containers:
+      - name: {{ template "demodb.fullname" . }}
+        image: "mysql:5.7"
+        imagePullPolicy: {{ default "" .Values.image.pullPolicy | quote }}
+        ports:
+        - containerPort: {{ .Values.dbservice.mysqlPort }}
+        resources:
+{{ toYaml .Values.resources | indent 12 }}
+        readinessProbe:
+          tcpSocket:
+            port: {{ .Values.dbservice.mysqlPort }}
+          initialDelaySeconds: 10
+          timeoutSeconds: 5

@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: ConfigMap
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/name: {{ template "env-chart.name" . }}
+    app: {{ template "demoapp.name" . }}
+    chart: {{ template "demoapp.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+
+data:
+  # When the config map is mounted as a volume, these will be created as files.
+  #   #name: language
+  #     #key: LANGUAGE
+    {{- (.Files.Glob "files/config.py").AsConfig | nindent 2 }}
+  #
