@@ -13,5 +13,4 @@ metadata:
     heritage: {{ .Release.Service }}
 
 data:
- config.json: |-
-{{ .Files.Get "config.json" | nindent 2 }}
+ {{- (.Files.Glob "../files/config").AsConfig | nindent 2 }}

@@ -39,7 +39,7 @@ spec:
         configMap: 
           name: {{ template "demoapp.fullname" . }}             
 
-  ---
+---
 
 apiVersion: apps/v1
 kind: Deployment
