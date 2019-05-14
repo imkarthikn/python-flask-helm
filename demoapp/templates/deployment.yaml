@@ -66,6 +66,22 @@ spec:
             secretKeyRef:
               name: MYSQL_ROOT_PASSWORD
               key: password
+        - name: mysql
+          containerPort: 3306
+        livenessProbe:
+          exec:
+            command:
+            - mysqladmin
+            - ping
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+            - mysqladmin
+            - ping
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
         resources:
 {{ toYaml .Values.resources | indent 12 }}
         readinessProbe:
