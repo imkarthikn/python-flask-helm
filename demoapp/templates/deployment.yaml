@@ -1,9 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "demoapp.fullname" . }}
+  name: {{ template "demoapp.fullname" . }}
   labels:
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/name: {{ template "demoapp.name" . }}
+    app: {{ template "demoapp.name" . }}
+    chart: {{ template "demoapp.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+
 spec:
   replicas: {{ .Values.replicaCount }}
   template:
@@ -32,7 +40,7 @@ spec:
           initialDelaySeconds: 5
           timeoutSeconds: 1
         volumeMounts:
-        - name: config.py
+        - name: db-config
           mountPath: /app
       volumes:
       - name: db-config
@@ -44,9 +52,18 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "demoapp.fullname" . }}
+  name: {{ template "demoapp.fullname" . }}
   labels:
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app.kubernetes.io/name: {{ template "demoapp.name" . }}
+    app: {{ template "demoapp.name" . }}
+    chart: {{ template "demoapp.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+
+
 spec:
   #replicas: {{ .Values.replicaCount }}
   template:
@@ -66,6 +83,13 @@ spec:
             secretKeyRef:
               name: MYSQL_ROOT_PASSWORD
               key: password
+        volumeMounts:
+        - name: sql
+          mountPath: /docker-entrypoint-initdb.d/init.sql
+        volumes:
+        - name: sql
+          hostpath:
+            path: ../init.sql
         - name: mysql
           containerPort: 3306
         livenessProbe:

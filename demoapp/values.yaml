@@ -8,7 +8,7 @@ image:
   repository: app
   tag: latest
 #  pullPolicy: IfNotPresent
-  pullPolicy: never
+  pullPolicy: Never
 
 nameOverride: ""
 fullnameOverride: ""

@@ -1,7 +1,7 @@
 { 
  "config" :  {'user': 'root',
 'password': 'root',
-'host': 'db',
+'host': 'appdb',
 'port': '3306',
 'database': 'knights'
 }
