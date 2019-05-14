@@ -17,7 +17,7 @@ spec:
         imagePullPolicy: {{ default "" .Values.image.pullPolicy | quote }}
         ports:
         - name: http
-          containerPort: {{ .Values.appservice.internalPort }}
+          containerPort: {{ .Values.appService.internalPort }}
           protocol: TCP
         livenessProbe:
           httpGet:
@@ -32,19 +32,19 @@ spec:
           initialDelaySeconds: 5
           timeoutSeconds: 1
         volumeMounts:
-        - name: db-config
+        - name: config.py
           mountPath: /app
       volumes:
       - name: db-config
         configMap: 
-          name: {{ template "fullname" . }}             
+          name: {{ template "demoapp.fullname" . }}             
 
   ---
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "demodb.fullname" . }}
+  name: {{ include "demoapp.fullname" . }}
   labels:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
 spec:
@@ -52,18 +52,24 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ template "demodb.fullname" . }}
+        app: {{ template "demoapp.fullname" . }}
     spec:
       containers:
-      - name: {{ template "demodb.fullname" . }}
+      - name: {{ template "demoapp.fullname" . }}
         image: "mysql:5.7"
         imagePullPolicy: {{ default "" .Values.image.pullPolicy | quote }}
         ports:
-        - containerPort: {{ .Values.dbservice.mysqlPort }}
+        - containerPort: {{ .Values.dbService.mysqlPort }}
+        env:
+        - name: {{ template "demoapp.fullname" . }}
+          valueFrom:
+            secretKeyRef:
+              name: MYSQL_ROOT_PASSWORD
+              key: password
         resources:
 {{ toYaml .Values.resources | indent 12 }}
         readinessProbe:
           tcpSocket:
-            port: {{ .Values.dbservice.mysqlPort }}
+            port: {{ .Values.dbService.mysqlPort }}
           initialDelaySeconds: 10
           timeoutSeconds: 5

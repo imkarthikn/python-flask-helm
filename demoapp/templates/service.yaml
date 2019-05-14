@@ -7,13 +7,17 @@ metadata:
     helm.sh/chart: {{ include "demoapp.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app: {{ template "demoapp.name" . }}
+    chart: {{ template "demoapp.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ .Values.appService.type }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
-      protocol: TCP
-      name: http
+  - port: {{ .Values.appService.internalPort }}
+    targetPort: {{ .Values.appService.internalPort }}
+    protocol: TCP
+    name: {{ .Values.appService.name }}
   selector:
-    app.kubernetes.io/name: {{ include "demoapp.name" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    app: {{ template "demoapp.fullname" . }}
